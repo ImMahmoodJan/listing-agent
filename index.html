@@ -3,912 +3,923 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ListAI V2 — Advanced Product Listing Agent</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>ListAI — AI Product Listing Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-:root {
-  --bg: #07070a;
-  --surface: #0f0f14;
-  --surface2: #16161f;
-  --surface3: #1e1e2a;
-  --border: rgba(255,255,255,0.06);
-  --border2: rgba(255,255,255,0.11);
-  --accent: #c8ff00;
-  --accent2: #7c3aed;
-  --text: #f0f0f0;
-  --muted: #66668a;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --amazon: #ff9900;
-  --shopify: #96bf48;
-  --ebay: #e53238;
+:root{
+  --bg:#080810;
+  --bg2:#0d0d1a;
+  --card:#111120;
+  --card2:#161628;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.1);
+  --border3:rgba(255,255,255,0.16);
+  --text:#f2f2ff;
+  --muted:#6b6b8a;
+  --muted2:#9999bb;
+  --a1:#ff6b35;
+  --a2:#7c3aed;
+  --a3:#06b6d4;
+  --a4:#10b981;
+  --amazon:#ff9900;
+  --shopify:#96bf48;
+  --ebay:#e53238;
+  --glow1:rgba(255,107,53,0.15);
+  --glow2:rgba(124,58,237,0.12);
 }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Cabinet Grotesk',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  line-height:1.6;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(200,255,0,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200,255,0,0.025) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-  z-index: 0;
+/* noise overlay */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+  opacity:0.4;
 }
 
-.wrapper {
-  position: relative;
-  z-index: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem 6rem;
+/* ambient glows */
+.glow-orb{
+  position:fixed;
+  border-radius:50%;
+  filter:blur(100px);
+  pointer-events:none;
+  z-index:0;
+}
+.glow-orb-1{width:500px;height:500px;background:var(--glow1);top:-200px;right:-100px;}
+.glow-orb-2{width:400px;height:400px;background:var(--glow2);bottom:-100px;left:-100px;}
+
+/* ── NAV ── */
+nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(8,8,16,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 clamp(1rem,4vw,3rem);
 }
 
-/* ── HEADER ── */
-header {
-  padding: 2rem 0 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 3rem;
+.nav-inner{
+  max-width:1100px;
+  margin:0 auto;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
-.logo {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+.nav-logo{
+  font-family:'Clash Display',sans-serif;
+  font-size:1.35rem;
+  font-weight:700;
+  letter-spacing:-0.02em;
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-.logo span { color: var(--accent); }
-
-.header-right { display: flex; align-items: center; gap: 12px; }
-
-.version-badge {
-  background: rgba(124,58,237,0.15);
-  border: 1px solid rgba(124,58,237,0.3);
-  color: #a78bfa;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 100px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.logo-icon{
+  width:28px;height:28px;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.8rem;
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--success);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
+.nav-center{
+  display:flex;
+  gap:4px;
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:4px;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+@media(max-width:600px){.nav-center{display:none}}
+
+.nav-tab{
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.8rem;
+  font-weight:500;
+  padding:6px 14px;
+  border-radius:7px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+
+.nav-tab.active{background:var(--card2);color:var(--text);border:1px solid var(--border2);}
+.nav-tab:hover:not(.active){color:var(--muted2);}
+
+.nav-right{display:flex;align-items:center;gap:10px;}
+
+.nav-badge{
+  background:linear-gradient(135deg,rgba(255,107,53,0.15),rgba(124,58,237,0.15));
+  border:1px solid rgba(255,107,53,0.25);
+  color:var(--a1);
+  font-size:0.68rem;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:100px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+
+.pulse{
+  width:7px;height:7px;
+  background:var(--a4);
+  border-radius:50%;
+  animation:pulse 2s infinite;
+}
+
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+/* ── MAIN WRAPPER ── */
+.page{
+  position:relative;
+  z-index:1;
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 clamp(1rem,4vw,2.5rem) 5rem;
 }
 
 /* ── HERO ── */
-.hero { margin-bottom: 3rem; }
-
-.hero h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
-  font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  margin-bottom: 1rem;
+.hero{
+  padding:3.5rem 0 3rem;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:2rem;
+  align-items:center;
 }
 
-.hero h1 em { font-style: normal; color: var(--accent); }
+@media(max-width:700px){.hero{grid-template-columns:1fr;padding:2.5rem 0 2rem;}}
 
-.hero p {
-  font-size: 1rem;
-  color: var(--muted);
-  max-width: 500px;
-  line-height: 1.7;
-  margin-bottom: 1.5rem;
+.hero-left{}
+
+.hero-eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,107,53,0.08);
+  border:1px solid rgba(255,107,53,0.2);
+  color:var(--a1);
+  font-size:0.72rem;
+  font-weight:700;
+  padding:5px 12px;
+  border-radius:100px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:1.2rem;
 }
 
-.feature-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.hero h1{
+  font-family:'Clash Display',sans-serif;
+  font-size:clamp(2rem,4.5vw,3.2rem);
+  font-weight:700;
+  line-height:1.1;
+  letter-spacing:-0.03em;
+  margin-bottom:1rem;
 }
 
-.pill {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  font-size: 0.75rem;
-  padding: 5px 12px;
-  border-radius: 100px;
+.hero h1 .grad{
+  background:linear-gradient(135deg,var(--a1) 0%,#ff4d8d 50%,var(--a2) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
 }
 
-.pill.active {
-  background: rgba(200,255,0,0.08);
-  border-color: rgba(200,255,0,0.25);
-  color: var(--accent);
+.hero p{
+  font-size:1rem;
+  color:var(--muted2);
+  max-width:480px;
+  line-height:1.7;
+  margin-bottom:1.5rem;
 }
 
-/* ── TABS ── */
-.mode-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  padding: 4px;
-  margin-bottom: 2rem;
-  width: fit-content;
+.hero-pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
 }
 
-.mode-tab {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 8px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
+.hpill{
+  background:var(--card);
+  border:1px solid var(--border2);
+  color:var(--muted2);
+  font-size:0.72rem;
+  font-weight:500;
+  padding:5px 11px;
+  border-radius:100px;
+  display:flex;
+  align-items:center;
+  gap:5px;
 }
 
-.mode-tab.active {
-  background: var(--surface3);
-  color: var(--text);
-  border: 1px solid var(--border2);
+.hpill span{font-size:0.75rem;}
+
+/* stats card */
+.hero-stats{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  padding:1.5rem;
+  min-width:200px;
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
 }
 
-/* ── FORM ── */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+@media(max-width:700px){.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);min-width:0;}}
+
+.stat-item{text-align:center;}
+.stat-val{
+  font-family:'Clash Display',sans-serif;
+  font-size:1.6rem;
+  font-weight:700;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  line-height:1.2;
+}
+.stat-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:0.5rem 0 2rem;}
+
+/* ── FORM ROW ── */
+.form-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:1.2rem;
 }
 
-@media (max-width: 800px) { .form-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+@media(max-width:800px){.form-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.form-row{grid-template-columns:1fr;}}
 
-.field label {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 7px;
+.fld label{
+  display:block;
+  font-size:0.65rem;
+  font-weight:700;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  margin-bottom:6px;
 }
 
-.field input, .field select {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.88rem;
-  outline: none;
-  transition: border-color 0.2s;
-  appearance: none;
+.fld input,.fld select{
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:0.7rem 0.9rem;
+  color:var(--text);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.88rem;
+  outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+  appearance:none;
 }
 
-.field input:focus, .field select:focus { border-color: var(--accent); }
+.fld input:focus,.fld select:focus{
+  border-color:var(--a1);
+  box-shadow:0 0 0 3px rgba(255,107,53,0.1);
+}
 
-.field select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2366668a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  padding-right: 2.5rem;
-  cursor: pointer;
+.fld input::placeholder{color:var(--muted);}
+
+.fld select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6b8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 0.9rem center;
+  padding-right:2.2rem;
+  cursor:pointer;
 }
 
 /* ── UPLOAD ── */
-.upload-zone {
-  border: 1.5px dashed var(--border2);
-  border-radius: 20px;
-  padding: 2.5rem 2rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.25s;
-  background: var(--surface);
-  margin-bottom: 1.5rem;
-  position: relative;
-  overflow: hidden;
+.upload-wrap{
+  position:relative;
+  margin-bottom:1.2rem;
 }
 
-.upload-zone:hover, .upload-zone.drag-over {
-  border-color: var(--accent);
-  background: rgba(200,255,0,0.02);
+.upload-zone{
+  border:1.5px dashed var(--border3);
+  border-radius:16px;
+  padding:2.2rem 1.5rem;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.25s;
+  background:var(--card);
+  position:relative;
+  overflow:hidden;
 }
 
-.upload-zone input[type="file"] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
+.upload-zone::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(255,107,53,0.03),rgba(124,58,237,0.03));
+  opacity:0;
+  transition:opacity 0.25s;
 }
 
-.upload-icon {
-  width: 48px;
-  height: 48px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-  font-size: 1.3rem;
+.upload-zone:hover::before,.upload-zone.drag-over::before{opacity:1;}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--a1);}
+
+.upload-zone input[type="file"]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
 }
 
-.upload-zone h3 {
-  font-family: 'Syne', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.4rem;
+.upload-icon-wrap{
+  width:52px;height:52px;
+  background:linear-gradient(135deg,rgba(255,107,53,0.1),rgba(124,58,237,0.1));
+  border:1px solid var(--border2);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 1rem;
+  font-size:1.3rem;
 }
 
-.upload-zone p { color: var(--muted); font-size: 0.8rem; }
-
-/* ── BULK PREVIEW ── */
-.bulk-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
-  margin-bottom: 1.5rem;
+.upload-zone h3{
+  font-family:'Clash Display',sans-serif;
+  font-size:0.95rem;
+  font-weight:600;
+  margin-bottom:0.3rem;
 }
 
-.bulk-item {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border2);
-  aspect-ratio: 1;
+.upload-zone p{color:var(--muted);font-size:0.78rem;}
+
+/* ── PREVIEW ── */
+#preview-wrap{
+  display:none;
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:16px;
+  padding:1.2rem;
+  margin-bottom:1.2rem;
+  gap:1.2rem;
+  align-items:center;
 }
 
-.bulk-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+#preview-wrap.show{display:flex;}
+
+@media(max-width:500px){#preview-wrap{flex-direction:column;text-align:center;}}
+
+#preview-img{
+  width:100px;height:100px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid var(--border2);
+  flex-shrink:0;
 }
 
-.bulk-item .remove-btn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(0,0,0,0.7);
-  border: none;
-  color: white;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 0.7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.preview-meta{flex:1;}
+.preview-meta h3{font-size:0.92rem;font-weight:700;margin-bottom:3px;}
+.preview-meta p{color:var(--muted);font-size:0.78rem;margin-bottom:0.8rem;}
 
-.bulk-item .item-status {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0,0,0,0.8);
-  font-size: 0.65rem;
-  padding: 4px;
-  text-align: center;
-  color: var(--muted);
-}
-
-.bulk-item .item-status.done { color: var(--success); }
-.bulk-item .item-status.processing { color: var(--accent); }
-.bulk-item .item-status.error { color: var(--danger); }
-
-/* ── SINGLE PREVIEW ── */
-#preview-container {
-  display: none;
-  gap: 1.5rem;
-  align-items: flex-start;
-  margin-bottom: 1.5rem;
-}
-
-#preview-container.visible { display: flex; }
-
-#preview-img {
-  width: 160px;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 14px;
-  border: 1px solid var(--border2);
-  flex-shrink: 0;
-}
-
-.preview-info { flex: 1; }
-
-.preview-info h3 {
-  font-family: 'Syne', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.3rem;
-}
-
-.preview-info p { color: var(--muted); font-size: 0.82rem; margin-bottom: 1rem; }
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
 
 /* ── BUTTONS ── */
-.btn-generate {
-  background: var(--accent);
-  color: #000;
-  font-family: 'Syne', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  border: none;
-  border-radius: 10px;
-  padding: 0.8rem 1.8rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.btn-primary{
+  background:linear-gradient(135deg,var(--a1),#e8553a);
+  color:#fff;
+  font-family:'Clash Display',sans-serif;
+  font-size:0.88rem;
+  font-weight:600;
+  border:none;
+  border-radius:10px;
+  padding:0.7rem 1.6rem;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:inline-flex;align-items:center;gap:7px;
+  letter-spacing:-0.01em;
 }
 
-.btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(200,255,0,0.2); }
-.btn-generate:active { transform: translateY(0); }
-.btn-generate:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,107,53,0.3);}
+.btn-primary:active{transform:translateY(0);}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
 
-.btn-secondary {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 500;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.btn-ghost{
+  background:var(--card2);
+  border:1px solid var(--border2);
+  color:var(--muted2);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.8rem;
+  font-weight:500;
+  padding:0.6rem 1.1rem;
+  border-radius:9px;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:inline-flex;align-items:center;gap:6px;
 }
 
-.btn-secondary:hover { border-color: var(--border2); background: var(--surface3); }
+.btn-ghost:hover{border-color:var(--border3);color:var(--text);}
+
+/* ── BULK GRID ── */
+.bulk-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  gap:8px;
+  margin-bottom:1rem;
+}
+
+.bulk-item{
+  position:relative;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid var(--border2);
+  aspect-ratio:1;
+}
+
+.bulk-item img{width:100%;height:100%;object-fit:cover;}
+
+.bulk-item .rm{
+  position:absolute;top:4px;right:4px;
+  background:rgba(0,0,0,0.75);
+  border:none;color:#fff;
+  width:20px;height:20px;
+  border-radius:50%;
+  cursor:pointer;font-size:0.65rem;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.bulk-item .bstat{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(0,0,0,0.8);
+  font-size:0.6rem;padding:3px;text-align:center;color:var(--muted);
+}
+
+.bstat.done{color:var(--a4);}
+.bstat.processing{color:var(--a1);}
+.bstat.error{color:#ef4444;}
 
 /* ── AGENT STEPS ── */
-.agent-steps {
-  display: none;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 1.2rem 1.5rem;
-  margin-bottom: 1.5rem;
+.agent-panel{
+  display:none;
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:14px;
+  padding:1.1rem 1.3rem;
+  margin-bottom:1.2rem;
 }
 
-.agent-steps.visible { display: block; }
+.agent-panel.show{display:block;}
 
-.agent-steps-title {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  margin-bottom: 1rem;
+.agent-title{
+  font-size:0.65rem;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  color:var(--muted);
+  margin-bottom:0.9rem;
+  display:flex;align-items:center;gap:6px;
 }
 
-.step-list { display: flex; flex-direction: column; gap: 10px; }
+.step-list{display:flex;flex-direction:column;gap:8px;}
 
-.step-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.85rem;
-  color: var(--muted);
-  transition: color 0.3s;
+.step{
+  display:flex;align-items:center;gap:10px;
+  font-size:0.82rem;color:var(--muted);
+  transition:color 0.3s;
 }
 
-.step-item.active { color: var(--text); }
-.step-item.done { color: var(--success); }
-.step-item.error { color: var(--danger); }
+.step.active{color:var(--text);}
+.step.done{color:var(--a4);}
+.step.err{color:#ef4444;}
 
-.step-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  flex-shrink: 0;
-  transition: all 0.3s;
+.step-ico{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--card2);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;flex-shrink:0;transition:all 0.3s;
 }
 
-.step-item.active .step-icon {
-  background: rgba(200,255,0,0.1);
-  border-color: var(--accent);
-  color: var(--accent);
+.step.active .step-ico{background:rgba(255,107,53,0.1);border-color:var(--a1);color:var(--a1);}
+.step.done .step-ico{background:rgba(16,185,129,0.1);border-color:var(--a4);color:var(--a4);}
+
+.spin{
+  width:12px;height:12px;
+  border:2px solid var(--border2);
+  border-top-color:var(--a1);
+  border-radius:50%;
+  animation:sp 0.8s linear infinite;
 }
 
-.step-item.done .step-icon {
-  background: rgba(34,197,94,0.1);
-  border-color: var(--success);
-  color: var(--success);
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── KEYWORDS ── */
+.kw-panel{
+  display:none;
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:14px;
+  padding:1.1rem 1.3rem;
+  margin-bottom:1.2rem;
 }
 
-.step-spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.kw-panel.show{display:block;}
+
+.panel-title{
+  font-size:0.65rem;text-transform:uppercase;
+  letter-spacing:0.12em;color:var(--muted);
+  margin-bottom:0.9rem;display:flex;align-items:center;gap:6px;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+.kw-wrap{display:flex;flex-wrap:wrap;gap:6px;}
 
-/* ── KEYWORDS BOX ── */
-.keywords-box {
-  display: none;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 1.2rem 1.5rem;
-  margin-bottom: 1.5rem;
+.kw{
+  background:var(--card2);border:1px solid var(--border2);
+  color:var(--text);font-size:0.73rem;
+  padding:5px 11px;border-radius:100px;
+  cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;gap:5px;
 }
 
-.keywords-box.visible { display: block; }
+.kw:hover{border-color:var(--a1);color:var(--a1);}
 
-.keywords-box-title {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.kw-sc{
+  font-size:0.62rem;color:var(--muted);
+  background:var(--bg2);
+  padding:1px 5px;border-radius:100px;
 }
 
-.kw-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-
-.kw-tag {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-size: 0.75rem;
-  padding: 5px 12px;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+/* ── PRICE ── */
+.price-panel{
+  display:none;background:var(--card);
+  border:1px solid var(--border2);border-radius:14px;
+  padding:1.1rem 1.3rem;margin-bottom:1.2rem;
 }
 
-.kw-tag:hover { border-color: var(--accent); color: var(--accent); }
+.price-panel.show{display:block;}
 
-.kw-score {
-  font-size: 0.65rem;
-  color: var(--muted);
-  background: var(--surface3);
-  padding: 1px 6px;
-  border-radius: 100px;
+.price-insight{font-size:0.82rem;color:var(--muted2);margin-bottom:0.9rem;}
+
+.price-cards{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
 }
 
-/* ── PRICE BOX ── */
-.price-box {
-  display: none;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 1.2rem 1.5rem;
-  margin-bottom: 1.5rem;
+@media(max-width:480px){.price-cards{grid-template-columns:1fr;}}
+
+.pc{
+  background:var(--card2);border:1.5px solid var(--border2);
+  border-radius:12px;padding:0.9rem;text-align:center;
+  cursor:pointer;transition:all 0.2s;
 }
 
-.price-box.visible { display: block; }
-
-.price-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 1rem;
+.pc:hover,.pc.sel{
+  border-color:var(--a1);
+  background:rgba(255,107,53,0.05);
 }
 
-.price-card {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  padding: 1rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
+.pc-lbl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;}
+
+.pc-val{
+  font-family:'Clash Display',sans-serif;
+  font-size:1.4rem;font-weight:700;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 
-.price-card:hover, .price-card.selected {
-  border-color: var(--accent);
-  background: rgba(200,255,0,0.05);
+.pc-note{font-size:0.68rem;color:var(--muted);margin-top:3px;}
+
+/* ── SEO ── */
+.seo-panel{
+  display:none;background:var(--card);
+  border:1px solid var(--border2);border-radius:14px;
+  padding:1.1rem 1.3rem;margin-bottom:1.2rem;
 }
 
-.price-card-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-.price-card-value { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
-.price-card-note { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+.seo-panel.show{display:flex;align-items:center;gap:1.5rem;}
 
-/* ── SEO SCORE ── */
-.seo-score-box {
-  display: none;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 1.2rem 1.5rem;
-  margin-bottom: 1.5rem;
+@media(max-width:500px){.seo-panel.show{flex-direction:column;}}
+
+.seo-ring{
+  width:72px;height:72px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;position:relative;
 }
 
-.seo-score-box.visible { display: flex; align-items: center; gap: 2rem; }
-
-.score-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: conic-gradient(var(--accent) 0%, var(--surface2) 0%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  position: relative;
+.seo-ring::before{
+  content:'';position:absolute;
+  width:54px;height:54px;
+  background:var(--card);border-radius:50%;
 }
 
-.score-circle::before {
-  content: '';
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  background: var(--surface);
-  border-radius: 50%;
+.seo-num{
+  font-family:'Clash Display',sans-serif;
+  font-size:1.1rem;font-weight:700;
+  position:relative;z-index:1;
 }
 
-.score-num {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 800;
-  position: relative;
-  z-index: 1;
-}
-
-.score-details { flex: 1; }
-.score-label { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
-.score-tips { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+.seo-info{}
+.seo-lbl{font-family:'Clash Display',sans-serif;font-size:0.9rem;font-weight:600;margin-bottom:4px;}
+.seo-tip{font-size:0.78rem;color:var(--muted2);line-height:1.5;}
 
 /* ── RESULTS ── */
-#results { display: none; }
-#results.visible { display: block; }
+#results{display:none;}
+#results.show{display:block;}
 
-.results-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
+.results-top{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.2rem;flex-wrap:wrap;gap:10px;
 }
 
-.results-header h2 {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 700;
+.results-top h2{
+  font-family:'Clash Display',sans-serif;
+  font-size:1.2rem;font-weight:700;
 }
 
-.results-actions { display: flex; gap: 8px; }
+.results-actions{display:flex;gap:8px;flex-wrap:wrap;}
 
-.stats-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 2rem;
+/* stats strip */
+.stats-strip{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;margin-bottom:1.5rem;
 }
 
-@media (max-width: 600px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:600px){.stats-strip{grid-template-columns:repeat(2,1fr);}}
 
-.stat {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
-  text-align: center;
+.sstat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:0.9rem;text-align:center;
 }
 
-.stat-num {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--accent);
+.sstat-n{
+  font-family:'Clash Display',sans-serif;
+  font-size:1.4rem;font-weight:700;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 
-.stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.sstat-l{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
 
-/* ── PLATFORM TABS ── */
-.platform-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 1.5rem;
+/* platform tabs */
+.ptabs{display:flex;gap:6px;margin-bottom:1.2rem;flex-wrap:wrap;}
+
+.ptab{
+  background:var(--card);border:1px solid var(--border2);
+  color:var(--muted2);font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.8rem;font-weight:500;
+  padding:7px 16px;border-radius:9px;
+  cursor:pointer;transition:all 0.2s;
 }
 
-.ptab {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 500;
-  padding: 8px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
+.ptab:hover{color:var(--text);}
+.ptab.active{color:#000!important;font-weight:700;}
+.ptab[data-p="amazon"].active{background:var(--amazon);border-color:var(--amazon);}
+.ptab[data-p="shopify"].active{background:var(--shopify);border-color:var(--shopify);}
+.ptab[data-p="ebay"].active{background:var(--ebay);border-color:var(--ebay);}
+
+.plisting{display:none;}
+.plisting.active{display:block;}
+
+/* listing card */
+.lcard{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:18px;overflow:hidden;
+  animation:fadeUp 0.3s ease;
 }
 
-.ptab:hover { color: var(--text); }
-.ptab.active { color: #000 !important; font-weight: 700; }
-.ptab[data-p="amazon"].active { background: var(--amazon); border-color: var(--amazon); }
-.ptab[data-p="shopify"].active { background: var(--shopify); border-color: var(--shopify); }
-.ptab[data-p="ebay"].active { background: var(--ebay); border-color: var(--ebay); }
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-.plisting { display: none; }
-.plisting.active { display: block; }
-
-/* ── LISTING CARD ── */
-.listing-card {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  overflow: hidden;
-  animation: fadeUp 0.3s ease;
+.lcard-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.3rem;border-bottom:1px solid var(--border);
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.plat-label{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Clash Display',sans-serif;font-size:0.9rem;font-weight:600;
 }
 
-.lcard-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+.pdot{width:8px;height:8px;border-radius:50%;}
+
+.btn-copy-all{
+  background:var(--card2);border:1px solid var(--border2);
+  color:var(--muted2);font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.75rem;font-weight:500;
+  padding:5px 13px;border-radius:7px;
+  cursor:pointer;transition:all 0.2s;
 }
 
-.platform-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'Syne', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
+.btn-copy-all:hover{border-color:var(--border3);color:var(--text);}
+.btn-copy-all.copied{background:rgba(16,185,129,0.1);border-color:var(--a4);color:var(--a4);}
+
+.lcard-body{padding:1.2rem 1.3rem;}
+
+.lsec{margin-bottom:1.2rem;}
+.lsec:last-child{margin-bottom:0;}
+
+.lsec-lbl{
+  font-size:0.62rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.12em;
+  color:var(--muted);margin-bottom:6px;
 }
 
-.pdot { width: 9px; height: 9px; border-radius: 50%; }
-
-.lcard-actions { display: flex; gap: 8px; }
-
-.btn-copy-all {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-size: 0.78rem;
-  font-weight: 500;
-  padding: 5px 14px;
-  border-radius: 7px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: 'DM Sans', sans-serif;
+.lsec-content{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:10px;padding:0.85rem 1rem;
+  font-size:0.84rem;line-height:1.75;
+  color:#c0c0dd;position:relative;
 }
 
-.btn-copy-all:hover { background: var(--surface3); }
-.btn-copy-all.copied { background: rgba(200,255,0,0.1); border-color: var(--accent); color: var(--accent); }
-
-.lcard-body { padding: 1.5rem; }
-
-.lsection { margin-bottom: 1.4rem; }
-.lsection:last-child { margin-bottom: 0; }
-
-.lsection-label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-  margin-bottom: 7px;
+.icopy{
+  position:absolute;top:7px;right:7px;
+  background:var(--card);border:1px solid var(--border2);
+  color:var(--muted);font-size:0.62rem;
+  padding:2px 8px;border-radius:5px;
+  cursor:pointer;opacity:0;transition:all 0.15s;
+  font-family:'Cabinet Grotesk',sans-serif;
 }
 
-.lsection-content {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.9rem 1rem;
-  font-size: 0.85rem;
-  line-height: 1.75;
-  color: #c8c8e0;
-  position: relative;
+.lsec-content:hover .icopy{opacity:1;}
+.icopy:hover{color:var(--a1);border-color:var(--a1);}
+
+.bullet-row{display:flex;gap:9px;margin-bottom:6px;line-height:1.5;}
+.bullet-row:last-child{margin-bottom:0;}
+
+.bdot{
+  width:5px;height:5px;border-radius:50%;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  margin-top:8px;flex-shrink:0;
 }
 
-.inline-copy {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  font-size: 0.65rem;
-  padding: 2px 8px;
-  border-radius: 5px;
-  cursor: pointer;
-  opacity: 0;
-  transition: all 0.15s;
-  font-family: 'DM Sans', sans-serif;
+.tags-wrap{display:flex;flex-wrap:wrap;gap:5px;}
+
+.stag{
+  background:var(--card);border:1px solid var(--border2);
+  color:var(--muted2);font-size:0.7rem;
+  padding:3px 9px;border-radius:100px;
+  cursor:pointer;transition:all 0.15s;
 }
 
-.lsection-content:hover .inline-copy { opacity: 1; }
-.inline-copy:hover { color: var(--accent); border-color: var(--accent); }
-
-.bullet-row { display: flex; gap: 10px; margin-bottom: 6px; line-height: 1.5; }
-.bullet-row:last-child { margin-bottom: 0; }
-.bullet-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-top: 8px; flex-shrink: 0; }
-
-.tags-row { display: flex; flex-wrap: wrap; gap: 5px; }
-.stag {
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  font-size: 0.72rem;
-  padding: 3px 10px;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.stag:hover { border-color: var(--accent); color: var(--accent); }
+.stag:hover{border-color:var(--a1);color:var(--a1);}
 
 /* ── BULK RESULTS ── */
-.bulk-results-grid {
-  display: grid;
-  gap: 1rem;
+.bulk-res-item{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:12px;overflow:hidden;margin-bottom:8px;
 }
 
-.bulk-result-item {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  overflow: hidden;
+.bri-head{
+  display:flex;align-items:center;gap:10px;
+  padding:0.9rem 1.1rem;cursor:pointer;transition:background 0.2s;
 }
 
-.bulk-result-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 1rem 1.2rem;
-  cursor: pointer;
-  transition: background 0.2s;
+.bri-head:hover{background:var(--card2);}
+
+.bri-thumb{
+  width:40px;height:40px;border-radius:8px;
+  object-fit:cover;border:1px solid var(--border2);flex-shrink:0;
 }
 
-.bulk-result-header:hover { background: var(--surface2); }
+.bri-info{flex:1;}
+.bri-name{font-size:0.85rem;font-weight:600;margin-bottom:1px;}
+.bri-meta{font-size:0.7rem;color:var(--muted);}
 
-.bulk-result-thumb {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid var(--border2);
-  flex-shrink: 0;
-}
-
-.bulk-result-info { flex: 1; }
-.bulk-result-name { font-size: 0.88rem; font-weight: 500; margin-bottom: 2px; }
-.bulk-result-meta { font-size: 0.72rem; color: var(--muted); }
-
-.bulk-result-body { display: none; padding: 0 1.2rem 1.2rem; }
-.bulk-result-body.open { display: block; }
+.bri-body{display:none;padding:0 1.1rem 1.1rem;}
+.bri-body.open{display:block;}
 
 /* ── ERROR ── */
-.error-box {
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 10px;
-  padding: 0.9rem 1.1rem;
-  color: #fca5a5;
-  font-size: 0.82rem;
-  margin-bottom: 1rem;
-  display: none;
+.err-box{
+  background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.18);
+  border-radius:10px;padding:0.8rem 1rem;
+  color:#fca5a5;font-size:0.8rem;margin-bottom:1rem;display:none;
 }
-.error-box.visible { display: block; }
+
+.err-box.show{display:block;}
 
 /* ── TOAST ── */
-.toast {
-  position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--accent);
-  color: #000;
-  font-family: 'Syne', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 0.7rem 1.4rem;
-  border-radius: 100px;
-  z-index: 9999;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  pointer-events: none;
-  white-space: nowrap;
+.toast{
+  position:fixed;bottom:1.5rem;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:linear-gradient(135deg,var(--a1),#e8553a);
+  color:#fff;
+  font-family:'Clash Display',sans-serif;
+  font-size:0.8rem;font-weight:600;
+  padding:0.65rem 1.3rem;border-radius:100px;
+  z-index:9999;
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(255,107,53,0.3);
 }
-.toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ── DIVIDER ── */
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 2rem 0;
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ── MOBILE NAV ── */
+.mobile-tabs{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(8,8,16,0.95);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  padding:0.5rem 1rem;
+  z-index:100;
+  justify-content:center;
+  gap:4px;
 }
+
+@media(max-width:600px){.mobile-tabs{display:flex;}}
+@media(max-width:600px){body{padding-bottom:60px;}}
+
+.mtab{
+  background:transparent;border:none;
+  color:var(--muted);font-family:'Cabinet Grotesk',sans-serif;
+  font-size:0.75rem;font-weight:500;
+  padding:6px 16px;border-radius:8px;
+  cursor:pointer;transition:all 0.2s;flex:1;text-align:center;
+}
+
+.mtab.active{background:var(--card2);color:var(--text);}
 </style>
 </head>
 <body>
 
-<div class="wrapper">
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo">List<span>AI</span></div>
-    <div class="header-right">
-      <div class="status-dot"></div>
-      <div class="version-badge">V2 Advanced</div>
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="logo-icon">✦</div>
+      ListAI
     </div>
-  </header>
+    <div class="nav-center">
+      <button class="nav-tab active" onclick="switchMode('single')">Single</button>
+      <button class="nav-tab" onclick="switchMode('bulk')">Bulk</button>
+    </div>
+    <div class="nav-right">
+      <div class="pulse"></div>
+      <div class="nav-badge">V3 Pro</div>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
 
   <!-- HERO -->
   <div class="hero">
-    <h1>The <em>smartest</em><br>listing agent<br>on the market.</h1>
-    <p>Upload products, find trending keywords, check competitor prices, and generate listings for every platform — all in one click.</p>
-    <div class="feature-pills">
-      <span class="pill active">✦ AI Vision</span>
-      <span class="pill active">🔍 Keyword Research</span>
-      <span class="pill active">💰 Price Intelligence</span>
-      <span class="pill active">📦 Bulk Mode</span>
-      <span class="pill active">📊 SEO Scoring</span>
-      <span class="pill active">📄 PDF Export</span>
+    <div class="hero-left">
+      <div class="hero-eyebrow">✦ AI-Powered</div>
+      <h1>Generate <span class="grad">perfect listings</span><br>for every platform</h1>
+      <p>Upload a product photo — AI researches keywords, analyzes pricing, and writes optimized listings for Amazon, Shopify & eBay in seconds.</p>
+      <div class="hero-pills">
+        <div class="hpill"><span>🔍</span> Keyword Research</div>
+        <div class="hpill"><span>💰</span> Price Intelligence</div>
+        <div class="hpill"><span>📊</span> SEO Scoring</div>
+        <div class="hpill"><span>📦</span> Bulk Mode</div>
+        <div class="hpill"><span>📄</span> PDF Export</div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-val">3</div>
+        <div class="stat-lbl">Platforms</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">10s</div>
+        <div class="stat-lbl">Per listing</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">∞</div>
+        <div class="stat-lbl">Keywords</div>
+      </div>
     </div>
   </div>
 
-  <!-- MODE TABS -->
-  <div class="mode-tabs">
-    <button class="mode-tab active" onclick="switchMode('single')">Single Product</button>
-    <button class="mode-tab" onclick="switchMode('bulk')">Bulk Mode</button>
-  </div>
+  <div class="divider"></div>
 
   <!-- FORM -->
-  <div class="form-grid">
-    <div class="field">
+  <div class="form-row">
+    <div class="fld">
       <label>Product Name</label>
       <input type="text" id="product-name" placeholder="e.g. Nike Air Max 90">
     </div>
-    <div class="field">
+    <div class="fld">
       <label>Price</label>
       <input type="text" id="product-price" placeholder="e.g. $99.99">
     </div>
-    <div class="field">
+    <div class="fld">
       <label>Category</label>
       <select id="product-category">
         <option>Shoes & Footwear</option>
@@ -922,7 +933,7 @@ header {
         <option>Other</option>
       </select>
     </div>
-    <div class="field">
+    <div class="fld">
       <label>Target Market</label>
       <select id="target-market">
         <option>USA</option>
@@ -934,115 +945,100 @@ header {
     </div>
   </div>
 
-  <!-- SINGLE UPLOAD -->
+  <!-- SINGLE MODE -->
   <div id="single-mode">
     <div class="upload-zone" id="upload-zone">
       <input type="file" id="file-input" accept="image/*">
-      <div class="upload-icon">📦</div>
+      <div class="upload-icon-wrap">📦</div>
       <h3>Drop your product image here</h3>
-      <p>JPG, PNG, WEBP supported</p>
+      <p>JPG, PNG, WEBP — click or drag & drop</p>
     </div>
 
-    <div id="preview-container">
+    <div id="preview-wrap">
       <img id="preview-img" src="" alt="">
-      <div class="preview-info">
+      <div class="preview-meta">
         <h3 id="preview-name">product.jpg</h3>
-        <p id="preview-meta">Ready to generate</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn-generate" id="generate-btn" onclick="generateSingle()">✦ Generate Listings</button>
-          <button class="btn-secondary" onclick="resetSingle()">↺ Change Image</button>
+        <p id="preview-size">Ready to generate</p>
+        <div class="btn-row">
+          <button class="btn-primary" id="gen-btn" onclick="generateSingle()">✦ Generate Listings</button>
+          <button class="btn-ghost" onclick="resetSingle()">↺ Change</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- BULK UPLOAD -->
+  <!-- BULK MODE -->
   <div id="bulk-mode" style="display:none">
-    <div class="upload-zone" id="bulk-upload-zone">
-      <input type="file" id="bulk-file-input" accept="image/*" multiple>
-      <div class="upload-icon">📦</div>
+    <div class="upload-zone" id="bulk-zone">
+      <input type="file" id="bulk-input" accept="image/*" multiple>
+      <div class="upload-icon-wrap">📦</div>
       <h3>Drop multiple product images here</h3>
-      <p>Select up to 20 images at once</p>
+      <p>Up to 20 images — click or drag & drop</p>
     </div>
     <div class="bulk-grid" id="bulk-grid"></div>
-    <div id="bulk-generate-wrap" style="display:none">
-      <button class="btn-generate" onclick="generateBulk()">✦ Generate All Listings</button>
-      <span id="bulk-count" style="font-size:0.82rem;color:var(--muted);margin-left:12px"></span>
+    <div id="bulk-gen-wrap" style="display:none;margin-bottom:1.2rem">
+      <button class="btn-primary" onclick="generateBulk()">✦ Generate All Listings</button>
+      <span id="bulk-count" style="font-size:0.8rem;color:var(--muted);margin-left:10px"></span>
     </div>
   </div>
 
   <!-- ERROR -->
-  <div class="error-box" id="error-box"></div>
+  <div class="err-box" id="err-box"></div>
 
   <!-- AGENT STEPS -->
-  <div class="agent-steps" id="agent-steps">
-    <div class="agent-steps-title">🤖 Agent working...</div>
-    <div class="step-list" id="step-list">
-      <div class="step-item" id="step-1">
-        <div class="step-icon">1</div>
-        <span>Analyzing product image with AI vision</span>
-      </div>
-      <div class="step-item" id="step-2">
-        <div class="step-icon">2</div>
-        <span>Researching trending keywords for your category</span>
-      </div>
-      <div class="step-item" id="step-3">
-        <div class="step-icon">3</div>
-        <span>Running competitor price intelligence</span>
-      </div>
-      <div class="step-item" id="step-4">
-        <div class="step-icon">4</div>
-        <span>Writing optimized listings for all platforms</span>
-      </div>
-      <div class="step-item" id="step-5">
-        <div class="step-icon">5</div>
-        <span>Calculating SEO scores and improvements</span>
-      </div>
+  <div class="agent-panel" id="agent-panel">
+    <div class="agent-title">🤖 Agent working...</div>
+    <div class="step-list">
+      <div class="step" id="s1"><div class="step-ico">1</div><span>Analyzing product with AI vision</span></div>
+      <div class="step" id="s2"><div class="step-ico">2</div><span>Researching trending keywords</span></div>
+      <div class="step" id="s3"><div class="step-ico">3</div><span>Running price intelligence</span></div>
+      <div class="step" id="s4"><div class="step-ico">4</div><span>Writing optimized listings</span></div>
+      <div class="step" id="s5"><div class="step-ico">5</div><span>Calculating SEO scores</span></div>
     </div>
   </div>
 
-  <!-- KEYWORDS BOX -->
-  <div class="keywords-box" id="keywords-box">
-    <div class="keywords-box-title">🔍 Trending Keywords Found <span style="color:var(--success);font-size:0.65rem">LIVE</span></div>
-    <div class="kw-grid" id="kw-grid"></div>
+  <!-- KEYWORDS -->
+  <div class="kw-panel" id="kw-panel">
+    <div class="panel-title">🔍 Trending Keywords <span style="color:var(--a4);font-size:0.6rem;font-weight:700;background:rgba(16,185,129,0.1);padding:2px 7px;border-radius:100px">LIVE</span></div>
+    <div class="kw-wrap" id="kw-wrap"></div>
   </div>
 
-  <!-- PRICE BOX -->
-  <div class="price-box" id="price-box">
-    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.3rem">💰 Price Intelligence</div>
-    <div style="font-size:0.82rem;color:var(--muted)" id="price-insight">Analyzing market prices...</div>
-    <div class="price-grid" id="price-grid"></div>
+  <!-- PRICE -->
+  <div class="price-panel" id="price-panel">
+    <div class="panel-title">💰 Price Intelligence</div>
+    <div class="price-insight" id="price-insight"></div>
+    <div class="price-cards" id="price-cards"></div>
   </div>
 
-  <!-- SEO SCORE -->
-  <div class="seo-score-box" id="seo-score-box">
-    <div class="score-circle" id="score-circle">
-      <div class="score-num" id="score-num">--</div>
+  <!-- SEO -->
+  <div class="seo-panel" id="seo-panel">
+    <div class="seo-ring" id="seo-ring">
+      <div class="seo-num" id="seo-num">--</div>
     </div>
-    <div class="score-details">
-      <div class="score-label" id="score-label">SEO Score</div>
-      <div class="score-tips" id="score-tips">Calculating...</div>
+    <div class="seo-info">
+      <div class="seo-lbl" id="seo-lbl">SEO Score</div>
+      <div class="seo-tip" id="seo-tip">Calculating...</div>
     </div>
   </div>
 
   <!-- SINGLE RESULTS -->
   <div id="results">
-    <div class="results-header">
+    <div class="results-top">
       <h2>✦ Listings Ready</h2>
       <div class="results-actions">
-        <button class="btn-secondary" onclick="exportPDF()">📄 Export PDF</button>
-        <button class="btn-secondary" onclick="resetSingle()">↺ New Product</button>
+        <button class="btn-ghost" onclick="exportPDF()">📄 Export PDF</button>
+        <button class="btn-ghost" onclick="resetSingle()">↺ New Product</button>
       </div>
     </div>
 
-    <div class="stats-bar">
-      <div class="stat"><div class="stat-num" id="stat-words">—</div><div class="stat-label">Words Written</div></div>
-      <div class="stat"><div class="stat-num">3</div><div class="stat-label">Platforms</div></div>
-      <div class="stat"><div class="stat-num" id="stat-kw">—</div><div class="stat-label">Keywords</div></div>
-      <div class="stat"><div class="stat-num" id="stat-score">—</div><div class="stat-label">SEO Score</div></div>
+    <div class="stats-strip">
+      <div class="sstat"><div class="sstat-n" id="sw">—</div><div class="sstat-l">Words</div></div>
+      <div class="sstat"><div class="sstat-n">3</div><div class="sstat-l">Platforms</div></div>
+      <div class="sstat"><div class="sstat-n" id="sk">—</div><div class="sstat-l">Keywords</div></div>
+      <div class="sstat"><div class="sstat-n" id="ss">—</div><div class="sstat-l">SEO Score</div></div>
     </div>
 
-    <div class="platform-tabs">
+    <div class="ptabs">
       <button class="ptab active" data-p="amazon" onclick="switchPTab('amazon')">🛒 Amazon</button>
       <button class="ptab" data-p="shopify" onclick="switchPTab('shopify')">🏪 Shopify</button>
       <button class="ptab" data-p="ebay" onclick="switchPTab('ebay')">📦 eBay</button>
@@ -1050,78 +1046,45 @@ header {
 
     <!-- Amazon -->
     <div class="plisting active" id="pl-amazon">
-      <div class="listing-card">
-        <div class="lcard-header">
-          <div class="platform-label"><div class="pdot" style="background:#ff9900"></div>Amazon</div>
-          <div class="lcard-actions">
-            <button class="btn-copy-all" onclick="copyPlatform('amazon')">⧉ Copy All</button>
-          </div>
+      <div class="lcard">
+        <div class="lcard-top">
+          <div class="plat-label"><div class="pdot" style="background:#ff9900"></div>Amazon</div>
+          <button class="btn-copy-all" onclick="copyPlat('amazon')">⧉ Copy All</button>
         </div>
         <div class="lcard-body">
-          <div class="lsection">
-            <div class="lsection-label">Title</div>
-            <div class="lsection-content" id="az-title"><button class="inline-copy" onclick="copyEl('az-title')">copy</button></div>
-          </div>
-          <div class="lsection">
-            <div class="lsection-label">Bullet Points</div>
-            <div class="lsection-content" id="az-bullets"><button class="inline-copy" onclick="copyEl('az-bullets')">copy</button></div>
-          </div>
-          <div class="lsection">
-            <div class="lsection-label">Description</div>
-            <div class="lsection-content" id="az-desc"><button class="inline-copy" onclick="copyEl('az-desc')">copy</button></div>
-          </div>
+          <div class="lsec"><div class="lsec-lbl">Title</div><div class="lsec-content" id="az-t"><button class="icopy" onclick="copyEl('az-t')">copy</button></div></div>
+          <div class="lsec"><div class="lsec-lbl">Bullet Points</div><div class="lsec-content" id="az-b"><button class="icopy" onclick="copyEl('az-b')">copy</button></div></div>
+          <div class="lsec"><div class="lsec-lbl">Description</div><div class="lsec-content" id="az-d"><button class="icopy" onclick="copyEl('az-d')">copy</button></div></div>
         </div>
       </div>
     </div>
 
     <!-- Shopify -->
     <div class="plisting" id="pl-shopify">
-      <div class="listing-card">
-        <div class="lcard-header">
-          <div class="platform-label"><div class="pdot" style="background:#96bf48"></div>Shopify</div>
-          <div class="lcard-actions">
-            <button class="btn-copy-all" onclick="copyPlatform('shopify')">⧉ Copy All</button>
-          </div>
+      <div class="lcard">
+        <div class="lcard-top">
+          <div class="plat-label"><div class="pdot" style="background:#96bf48"></div>Shopify</div>
+          <button class="btn-copy-all" onclick="copyPlat('shopify')">⧉ Copy All</button>
         </div>
         <div class="lcard-body">
-          <div class="lsection">
-            <div class="lsection-label">Title</div>
-            <div class="lsection-content" id="sh-title"><button class="inline-copy" onclick="copyEl('sh-title')">copy</button></div>
-          </div>
-          <div class="lsection">
-            <div class="lsection-label">Description</div>
-            <div class="lsection-content" id="sh-desc"><button class="inline-copy" onclick="copyEl('sh-desc')">copy</button></div>
-          </div>
-          <div class="lsection">
-            <div class="lsection-label">SEO Tags</div>
-            <div class="lsection-content" id="sh-tags"></div>
-          </div>
+          <div class="lsec"><div class="lsec-lbl">Title</div><div class="lsec-content" id="sh-t"><button class="icopy" onclick="copyEl('sh-t')">copy</button></div></div>
+          <div class="lsec"><div class="lsec-lbl">Description</div><div class="lsec-content" id="sh-d"><button class="icopy" onclick="copyEl('sh-d')">copy</button></div></div>
+          <div class="lsec"><div class="lsec-lbl">SEO Tags</div><div class="lsec-content" id="sh-tg"></div></div>
         </div>
       </div>
     </div>
 
     <!-- eBay -->
     <div class="plisting" id="pl-ebay">
-      <div class="listing-card">
-        <div class="lcard-header">
-          <div class="platform-label"><div class="pdot" style="background:#e53238"></div>eBay</div>
-          <div class="lcard-actions">
-            <button class="btn-copy-all" onclick="copyPlatform('ebay')">⧉ Copy All</button>
-          </div>
+      <div class="lcard">
+        <div class="lcard-top">
+          <div class="plat-label"><div class="pdot" style="background:#e53238"></div>eBay</div>
+          <button class="btn-copy-all" onclick="copyPlat('ebay')">⧉ Copy All</button>
         </div>
         <div class="lcard-body">
-          <div class="lsection">
-            <div class="lsection-label">Title</div>
-            <div class="lsection-content" id="eb-title"><button class="inline-copy" onclick="copyEl('eb-title')">copy</button></div>
-          </div>
-          <div class="lsection">
-            <div class="lsection-label">Description</div>
-            <div class="lsection-content" id="eb-desc"><button class="inline-copy" onclick="copyEl('eb-desc')">copy</button></div>
-          </div>
-          <div class="lsection">
-            <div class="lsection-label">Condition Notes</div>
-            <div class="lsection-content" id="eb-condition"><button class="inline-copy" onclick="copyEl('eb-condition')">copy</button></div>
-          </div>
+          <div class="lsec"><div class="lsec-lbl">Title</div><div class="lsec-content" id="eb-t"><button class="icopy" onclick="copyEl('eb-t')">copy</button></div></div>
+          <div class="lsec"><div class="lsec-lbl">Description</div><div class="lsec-content" id="eb-d"><button class="icopy" onclick="copyEl('eb-d')">copy</button></div></div>
+          <div class="lsec"><div class="lsec-lbl">Condition</div><div class="lsec-content" id="eb-c"><button class="icopy" onclick="copyEl('eb-c')">copy</button></div></div>
         </div>
       </div>
     </div>
@@ -1129,664 +1092,386 @@ header {
 
   <!-- BULK RESULTS -->
   <div id="bulk-results" style="display:none">
-    <div class="results-header">
+    <div class="results-top">
       <h2>✦ Bulk Listings Ready</h2>
       <div class="results-actions">
-        <button class="btn-secondary" onclick="exportAllPDF()">📄 Export All PDFs</button>
-        <button class="btn-secondary" onclick="resetBulk()">↺ New Batch</button>
+        <button class="btn-ghost" onclick="resetBulk()">↺ New Batch</button>
       </div>
     </div>
-    <div class="bulk-results-grid" id="bulk-results-grid"></div>
+    <div id="bulk-res-grid"></div>
   </div>
 
+</div>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs">
+  <button class="mtab active" onclick="switchMode('single');setMTab(this)">Single</button>
+  <button class="mtab" onclick="switchMode('bulk');setMTab(this)">Bulk</button>
 </div>
 
 <div class="toast" id="toast">Copied!</div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────
 const GROQ_API_KEY = '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';
-// ─────────────────────────────────────────────────────────
 
-let mode = 'single';
-let currentFile = null;
-let currentBase64 = null;
-let generatedData = {};
-let bulkFiles = [];
-let bulkResults = [];
+let mode='single',curFile=null,curB64=null,genData={},bulkFiles=[],bulkRes=[];
 
-// ── MODE ──────────────────────────────────────────────────
-function switchMode(m) {
-  mode = m;
-  document.querySelectorAll('.mode-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&m==='single')||(i===1&&m==='bulk')));
-  document.getElementById('single-mode').style.display = m === 'single' ? '' : 'none';
-  document.getElementById('bulk-mode').style.display = m === 'bulk' ? '' : 'none';
-  document.getElementById('results').style.display = 'none';
-  document.getElementById('bulk-results').style.display = 'none';
+// ── MODE ──
+function switchMode(m){
+  mode=m;
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&m==='single')||(i===1&&m==='bulk')));
+  document.getElementById('single-mode').style.display=m==='single'?'':'none';
+  document.getElementById('bulk-mode').style.display=m==='bulk'?'':'none';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('bulk-results').style.display='none';
 }
 
-// ── FILE HANDLING ─────────────────────────────────────────
-const fileInput = document.getElementById('file-input');
-const uploadZone = document.getElementById('upload-zone');
+function setMTab(el){document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
 
-fileInput.addEventListener('change', e => { if (e.target.files[0]) handleSingleFile(e.target.files[0]); });
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault(); uploadZone.classList.remove('drag-over');
-  if (e.dataTransfer.files[0]) handleSingleFile(e.dataTransfer.files[0]);
-});
+// ── FILE ──
+const fi=document.getElementById('file-input');
+const uz=document.getElementById('upload-zone');
+fi.addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag-over');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag-over'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag-over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
 
-function handleSingleFile(file) {
-  if (!file.type.startsWith('image/')) return showError('Please upload an image.');
-  currentFile = file;
-  const reader = new FileReader();
-  reader.onload = e => {
-    currentBase64 = e.target.result;
-    document.getElementById('preview-img').src = e.target.result;
-    document.getElementById('preview-name').textContent = file.name;
-    document.getElementById('preview-meta').textContent = (file.size/1024).toFixed(0) + ' KB — ready';
-    document.getElementById('preview-container').classList.add('visible');
-    uploadZone.style.display = 'none';
-    hideResults();
+function handleFile(f){
+  if(!f.type.startsWith('image/'))return showErr('Please upload an image.');
+  curFile=f;
+  const r=new FileReader();
+  r.onload=e=>{
+    curB64=e.target.result;
+    document.getElementById('preview-img').src=e.target.result;
+    document.getElementById('preview-name').textContent=f.name;
+    document.getElementById('preview-size').textContent=(f.size/1024).toFixed(0)+' KB — ready';
+    document.getElementById('preview-wrap').classList.add('show');
+    uz.style.display='none';
+    document.getElementById('results').classList.remove('show');
+    hideExtra();
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(f);
 }
 
-// ── BULK FILE HANDLING ────────────────────────────────────
-const bulkInput = document.getElementById('bulk-file-input');
-const bulkUploadZone = document.getElementById('bulk-upload-zone');
+// ── BULK ──
+const bi=document.getElementById('bulk-input');
+const bz=document.getElementById('bulk-zone');
+bi.addEventListener('change',e=>{Array.from(e.target.files).forEach(f=>addBF(f));updateBGrid();});
+bz.addEventListener('dragover',e=>{e.preventDefault();bz.classList.add('drag-over');});
+bz.addEventListener('dragleave',()=>bz.classList.remove('drag-over'));
+bz.addEventListener('drop',e=>{e.preventDefault();bz.classList.remove('drag-over');Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')).forEach(f=>addBF(f));updateBGrid();});
 
-bulkInput.addEventListener('change', e => {
-  Array.from(e.target.files).forEach(f => addBulkFile(f));
-  updateBulkGrid();
-});
+function addBF(f){if(bulkFiles.length>=20)return;bulkFiles.push({file:f,status:'pending',b64:null,result:null});}
 
-bulkUploadZone.addEventListener('dragover', e => { e.preventDefault(); bulkUploadZone.classList.add('drag-over'); });
-bulkUploadZone.addEventListener('dragleave', () => bulkUploadZone.classList.remove('drag-over'));
-bulkUploadZone.addEventListener('drop', e => {
-  e.preventDefault(); bulkUploadZone.classList.remove('drag-over');
-  Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).forEach(f => addBulkFile(f));
-  updateBulkGrid();
-});
-
-function addBulkFile(file) {
-  if (bulkFiles.length >= 20) return;
-  if (!file.type.startsWith('image/')) return;
-  bulkFiles.push({ file, status: 'pending', base64: null, result: null });
-}
-
-function updateBulkGrid() {
-  const grid = document.getElementById('bulk-grid');
-  grid.innerHTML = '';
-  bulkFiles.forEach((item, i) => {
-    const div = document.createElement('div');
-    div.className = 'bulk-item';
-    div.id = `bulk-item-${i}`;
-    const reader = new FileReader();
-    reader.onload = e => {
-      item.base64 = e.target.result;
-      div.innerHTML = `
-        <img src="${e.target.result}" alt="">
-        <button class="remove-btn" onclick="removeBulkItem(${i})">✕</button>
-        <div class="item-status" id="bstatus-${i}">Pending</div>
-      `;
-    };
-    reader.readAsDataURL(item.file);
-    grid.appendChild(div);
+function updateBGrid(){
+  const g=document.getElementById('bulk-grid');g.innerHTML='';
+  bulkFiles.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='bulk-item';d.id='bi-'+i;
+    const r=new FileReader();
+    r.onload=e=>{it.b64=e.target.result;d.innerHTML=`<img src="${e.target.result}" alt=""><button class="rm" onclick="rmBF(${i})">✕</button><div class="bstat" id="bs-${i}">Pending</div>`;};
+    r.readAsDataURL(it.file);g.appendChild(d);
   });
-  const wrap = document.getElementById('bulk-generate-wrap');
-  wrap.style.display = bulkFiles.length > 0 ? '' : 'none';
-  document.getElementById('bulk-count').textContent = `${bulkFiles.length} image${bulkFiles.length !== 1 ? 's' : ''} ready`;
+  const w=document.getElementById('bulk-gen-wrap');
+  w.style.display=bulkFiles.length>0?'':'none';
+  document.getElementById('bulk-count').textContent=bulkFiles.length+' image'+(bulkFiles.length!==1?'s':'')+' ready';
 }
 
-function removeBulkItem(i) {
-  bulkFiles.splice(i, 1);
-  updateBulkGrid();
+function rmBF(i){bulkFiles.splice(i,1);updateBGrid();}
+
+// ── STEPS ──
+function setStep(n,st){
+  const el=document.getElementById('s'+n);if(!el)return;
+  el.className='step '+st;
+  const ic=el.querySelector('.step-ico');
+  if(st==='active')ic.innerHTML='<div class="spin"></div>';
+  else if(st==='done')ic.innerHTML='✓';
+  else if(st==='err')ic.innerHTML='✕';
+  else ic.innerHTML=n;
 }
+function resetSteps(){for(let i=1;i<=5;i++)setStep(i,'');}
 
-// ── STEP MANAGER ──────────────────────────────────────────
-function setStep(n, state) {
-  const el = document.getElementById(`step-${n}`);
-  if (!el) return;
-  el.className = `step-item ${state}`;
-  const icon = el.querySelector('.step-icon');
-  if (state === 'active') icon.innerHTML = '<div class="step-spinner"></div>';
-  else if (state === 'done') icon.innerHTML = '✓';
-  else if (state === 'error') icon.innerHTML = '✕';
-  else icon.innerHTML = n;
-}
-
-function resetSteps() {
-  for (let i = 1; i <= 5; i++) setStep(i, '');
-}
-
-// ── GENERATE SINGLE ───────────────────────────────────────
-async function generateSingle() {
-  if (!currentFile) return showError('Please upload a product image first.');
-  if (GROQ_API_KEY === 'YOUR_GROQ_API_KEY_HERE') return showError('Please add your GROQ API key in the script.');
-  hideError();
-  hideResults();
-
-  document.getElementById('generate-btn').disabled = true;
-  document.getElementById('agent-steps').classList.add('visible');
-  document.getElementById('keywords-box').classList.remove('visible');
-  document.getElementById('price-box').classList.remove('visible');
-  document.getElementById('seo-score-box').classList.remove('visible');
+// ── GENERATE SINGLE ──
+async function generateSingle(){
+  if(!curFile)return showErr('Please upload a product image.');
+  if(GROQ_API_KEY==='YOUR_GROQ_API_KEY_HERE')return showErr('Please add your GROQ API key.');
+  hideErr();hideExtra();
+  document.getElementById('gen-btn').disabled=true;
+  document.getElementById('agent-panel').classList.add('show');
+  document.getElementById('results').classList.remove('show');
   resetSteps();
 
-  const name = document.getElementById('product-name').value;
-  const price = document.getElementById('product-price').value;
-  const category = document.getElementById('product-category').value;
-  const market = document.getElementById('target-market').value;
+  const name=document.getElementById('product-name').value;
+  const price=document.getElementById('product-price').value;
+  const cat=document.getElementById('product-category').value;
+  const mkt=document.getElementById('target-market').value;
 
-  try {
-    // Step 1 — Vision
-    setStep(1, 'active');
-    await delay(600);
-    setStep(1, 'done');
-
-    // Step 2 — Keywords
-    setStep(2, 'active');
-    const keywords = await findKeywords(category, name, market);
-    renderKeywords(keywords);
-    setStep(2, 'done');
-
-    // Step 3 — Pricing
-    setStep(3, 'active');
-    const pricing = analyzePricing(price, category);
-    renderPricing(pricing);
-    setStep(3, 'done');
-
-    // Step 4 — Write listings
-    setStep(4, 'active');
-    const listings = await writeListing(currentBase64, name, price, category, market, keywords);
-    setStep(4, 'done');
-
-    // Step 5 — SEO score
-    setStep(5, 'active');
-    await delay(500);
-    const score = calcSEO(listings, keywords);
-    renderSEO(score);
-    setStep(5, 'done');
-
-    generatedData = listings;
-    renderListings(listings);
-    showResults();
-
-  } catch (err) {
-    showError('Error: ' + err.message);
-  } finally {
-    document.getElementById('generate-btn').disabled = false;
-  }
+  try{
+    setStep(1,'active');await delay(500);setStep(1,'done');
+    setStep(2,'active');
+    const kws=await findKW(cat,name,mkt);
+    renderKW(kws);setStep(2,'done');
+    setStep(3,'active');
+    const pricing=calcPricing(price,cat);
+    renderPricing(pricing);setStep(3,'done');
+    setStep(4,'active');
+    const data=await writeListing(curB64,name,price,cat,mkt,kws);
+    setStep(4,'done');
+    setStep(5,'active');await delay(400);
+    const score=calcSEO(data,kws);
+    renderSEO(score);setStep(5,'done');
+    genData=data;
+    renderListings(data,kws);
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){showErr('Error: '+e.message);}
+  finally{document.getElementById('gen-btn').disabled=false;}
 }
 
-// ── GENERATE BULK ─────────────────────────────────────────
-async function generateBulk() {
-  if (bulkFiles.length === 0) return showError('Please upload at least one image.');
-  if (GROQ_API_KEY === 'YOUR_GROQ_API_KEY_HERE') return showError('Please add your GROQ API key.');
-  hideError();
-  document.getElementById('bulk-results').style.display = 'none';
-  bulkResults = [];
-
-  const category = document.getElementById('product-category').value;
-  const market = document.getElementById('target-market').value;
-
-  for (let i = 0; i < bulkFiles.length; i++) {
-    const item = bulkFiles[i];
-    const statusEl = document.getElementById(`bstatus-${i}`);
-    if (statusEl) { statusEl.textContent = 'Processing...'; statusEl.className = 'item-status processing'; }
-
-    try {
-      const keywords = await findKeywords(category, item.file.name, market);
-      const listings = await writeListing(item.base64, item.file.name, '', category, market, keywords);
-      item.result = listings;
-      item.status = 'done';
-      if (statusEl) { statusEl.textContent = 'Done ✓'; statusEl.className = 'item-status done'; }
-      bulkResults.push({ file: item, listings });
-    } catch (e) {
-      item.status = 'error';
-      if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'item-status error'; }
-    }
+// ── GENERATE BULK ──
+async function generateBulk(){
+  if(bulkFiles.length===0)return showErr('Please upload at least one image.');
+  if(GROQ_API_KEY==='YOUR_GROQ_API_KEY_HERE')return showErr('Please add your GROQ API key.');
+  hideErr();bulkRes=[];document.getElementById('bulk-results').style.display='none';
+  const cat=document.getElementById('product-category').value;
+  const mkt=document.getElementById('target-market').value;
+  for(let i=0;i<bulkFiles.length;i++){
+    const it=bulkFiles[i];
+    const s=document.getElementById('bs-'+i);
+    if(s){s.textContent='Processing...';s.className='bstat processing';}
+    try{
+      const kws=await findKW(cat,it.file.name,mkt);
+      const data=await writeListing(it.b64,it.file.name,'',cat,mkt,kws);
+      it.result=data;it.status='done';
+      if(s){s.textContent='Done ✓';s.className='bstat done';}
+      bulkRes.push({file:it,data});
+    }catch(e){it.status='error';if(s){s.textContent='Error';s.className='bstat error';}}
   }
-
-  renderBulkResults();
+  renderBulkRes();
 }
 
-function renderBulkResults() {
-  const grid = document.getElementById('bulk-results-grid');
-  grid.innerHTML = '';
-
-  bulkResults.forEach((r, i) => {
-    const div = document.createElement('div');
-    div.className = 'bulk-result-item';
-    div.innerHTML = `
-      <div class="bulk-result-header" onclick="toggleBulkResult(${i})">
-        <img class="bulk-result-thumb" src="${r.file.base64}" alt="">
-        <div class="bulk-result-info">
-          <div class="bulk-result-name">${r.file.file.name}</div>
-          <div class="bulk-result-meta">3 platforms • Click to expand</div>
-        </div>
-        <button class="btn-secondary" onclick="event.stopPropagation();copyAllBulk(${i})">⧉ Copy All</button>
-      </div>
-      <div class="bulk-result-body" id="brbody-${i}">
-        <div style="padding-top:1rem">
-          <div class="lsection-label" style="margin-bottom:6px">Amazon Title</div>
-          <div class="lsection-content" style="margin-bottom:10px">${r.listings.amazon_title || ''}</div>
-          <div class="lsection-label" style="margin-bottom:6px">Shopify Title</div>
-          <div class="lsection-content" style="margin-bottom:10px">${r.listings.shopify_title || ''}</div>
-          <div class="lsection-label" style="margin-bottom:6px">eBay Title</div>
-          <div class="lsection-content">${r.listings.ebay_title || ''}</div>
-        </div>
-      </div>
-    `;
-    grid.appendChild(div);
+function renderBulkRes(){
+  const g=document.getElementById('bulk-res-grid');g.innerHTML='';
+  bulkRes.forEach((r,i)=>{
+    const d=document.createElement('div');d.className='bulk-res-item';
+    d.innerHTML=`<div class="bri-head" onclick="togBRI(${i})"><img class="bri-thumb" src="${r.file.b64}" alt=""><div class="bri-info"><div class="bri-name">${r.file.file.name}</div><div class="bri-meta">3 platforms • Click to expand</div></div><button class="btn-ghost" onclick="event.stopPropagation();copyAllBulk(${i})">⧉ Copy</button></div><div class="bri-body" id="brb-${i}"><div style="padding-top:0.8rem"><div class="lsec-lbl" style="margin-bottom:5px">Amazon Title</div><div class="lsec-content" style="margin-bottom:8px">${r.data.amazon_title||''}</div><div class="lsec-lbl" style="margin-bottom:5px">Shopify Title</div><div class="lsec-content" style="margin-bottom:8px">${r.data.shopify_title||''}</div><div class="lsec-lbl" style="margin-bottom:5px">eBay Title</div><div class="lsec-content">${r.data.ebay_title||''}</div></div></div>`;
+    g.appendChild(d);
   });
-
-  document.getElementById('bulk-results').style.display = 'block';
-  document.getElementById('bulk-results').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('bulk-results').style.display='block';
+  document.getElementById('bulk-results').scrollIntoView({behavior:'smooth'});
 }
 
-function toggleBulkResult(i) {
-  const body = document.getElementById(`brbody-${i}`);
-  body.classList.toggle('open');
+function togBRI(i){document.getElementById('brb-'+i).classList.toggle('open');}
+function copyAllBulk(i){const r=bulkRes[i];copyText(`AMAZON:\n${r.data.amazon_title}\n\nSHOPIFY:\n${r.data.shopify_title}\n\nEBAY:\n${r.data.ebay_title}`);}
+
+// ── AI CALLS ──
+async function findKW(cat,name,mkt){
+  const res=await callGroq(`You are an SEO expert for e-commerce.
+Category: ${cat}, Product: ${name||'unknown'}, Market: ${mkt}
+Generate 12 high-converting search keywords.
+Return ONLY a JSON array: ["kw1","kw2",...] — no explanation.`);
+  try{return JSON.parse(res.replace(/```json|```/g,'').trim());}
+  catch{return ['premium quality','best seller',cat.toLowerCase()];}
 }
 
-function copyAllBulk(i) {
-  const r = bulkResults[i];
-  const text = `AMAZON:\nTitle: ${r.listings.amazon_title}\n\nSHOPIFY:\nTitle: ${r.listings.shopify_title}\n\nEBAY:\nTitle: ${r.listings.ebay_title}`;
-  copyText(text);
-}
-
-// ── AI FUNCTIONS ──────────────────────────────────────────
-async function findKeywords(category, name, market) {
-  const res = await callGroq(`You are an SEO expert for e-commerce.
-Category: ${category}
-Product: ${name || 'unknown'}
-Target market: ${market}
-
-Generate 12 high-converting search keywords for this product.
-Return ONLY a JSON array like: ["keyword1", "keyword2", ...]
-No explanation, just the JSON array.`);
-
-  try {
-    const clean = res.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch {
-    return ['premium quality', 'best seller', 'fast shipping', category.toLowerCase()];
-  }
-}
-
-function analyzePricing(currentPrice, category) {
-  const base = parseFloat(currentPrice) || getBasePrice(category);
-  return {
-    budget: (base * 0.85).toFixed(2),
-    optimal: (base * 1.0).toFixed(2),
-    premium: (base * 1.25).toFixed(2),
-    insight: currentPrice
-      ? `Based on your price of $${currentPrice}, here are 3 strategic pricing options for maximum sales.`
-      : `Based on typical ${category} pricing, here are recommended price points.`
+function calcPricing(price,cat){
+  const b=parseFloat(price)||({'Electronics':89,'Shoes & Footwear':79,'Clothing & Apparel':49,'Home & Garden':39,'Sports & Outdoors':59,'Beauty & Personal Care':29,'Toys & Games':34,'Jewelry & Accessories':44}[cat]||49);
+  return{
+    budget:(b*0.85).toFixed(2),
+    optimal:(b*1.0).toFixed(2),
+    premium:(b*1.25).toFixed(2),
+    insight:price?`Based on your price of $${price}, here are 3 strategic pricing options.`:`Based on typical ${cat} market pricing.`
   };
 }
 
-function getBasePrice(category) {
-  const prices = {
-    'Electronics': 89, 'Shoes & Footwear': 79, 'Clothing & Apparel': 49,
-    'Home & Garden': 39, 'Sports & Outdoors': 59, 'Beauty & Personal Care': 29,
-    'Toys & Games': 34, 'Jewelry & Accessories': 44
-  };
-  return prices[category] || 49;
+async function writeListing(b64,name,price,cat,mkt,kws){
+  const extra=[name&&`Product: ${name}`,price&&`Price: ${price}`,`Category: ${cat}`,`Market: ${mkt}`,`Use keywords: ${Array.isArray(kws)?kws.join(', '):''}`].filter(Boolean).join('\n');
+  const res=await callGroqVision(b64,`You are an expert e-commerce copywriter.\n${extra}\n\nWrite complete listings using EXACTLY these markers:\n\n===AMAZON_TITLE===\n===AMAZON_BULLETS===\n===AMAZON_DESC===\n===SHOPIFY_TITLE===\n===SHOPIFY_DESC===\n===SHOPIFY_TAGS===\n===EBAY_TITLE===\n===EBAY_DESC===\n===EBAY_CONDITION===\n\nRules: Amazon title max 200 chars, 5 bullets with •, Amazon desc 150-200 words, Shopify desc 100-150 words, 10 SEO tags, eBay title max 80 chars. Be specific about what you see.`);
+  return extractSections(res);
 }
 
-async function writeListing(base64, name, price, category, market, keywords) {
-  const kwStr = Array.isArray(keywords) ? keywords.join(', ') : '';
-  const extra = [name && `Product: ${name}`, price && `Price: ${price}`, `Category: ${category}`, `Market: ${market}`, `Keywords to use: ${kwStr}`].filter(Boolean).join('\n');
-
-  const res = await callGroqVision(base64, `You are an expert e-commerce copywriter.
-${extra}
-
-Write complete optimized listings using EXACTLY these markers:
-
-===AMAZON_TITLE===
-===AMAZON_BULLETS===
-===AMAZON_DESC===
-===SHOPIFY_TITLE===
-===SHOPIFY_DESC===
-===SHOPIFY_TAGS===
-===EBAY_TITLE===
-===EBAY_DESC===
-===EBAY_CONDITION===
-
-Rules:
-- Amazon title: keyword-rich, max 200 chars
-- Amazon bullets: exactly 5 bullet points starting with •
-- Amazon desc: 150-200 words SEO optimized
-- Shopify title: catchy and brand-focused
-- Shopify desc: conversational, 100-150 words
-- Shopify tags: 10 comma-separated keywords
-- eBay title: max 80 chars
-- eBay desc: direct and concise, 80-100 words
-- eBay condition: one line condition note
-
-Write all sections now. Use the keywords naturally.`);
-
-  return extractAllSections(res);
+async function callGroq(prompt){
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_API_KEY}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:500})});
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API error');}
+  return(await r.json()).choices[0].message.content;
 }
 
-async function callGroq(prompt) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 500
-    })
+async function callGroqVision(b64,prompt){
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_API_KEY}`},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:[{type:'image_url',image_url:{url:b64}},{type:'text',text:prompt}]}],max_tokens:2000})});
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API error');}
+  return(await r.json()).choices[0].message.content;
+}
+
+function extractSections(text){
+  const ms=['AMAZON_TITLE','AMAZON_BULLETS','AMAZON_DESC','SHOPIFY_TITLE','SHOPIFY_DESC','SHOPIFY_TAGS','EBAY_TITLE','EBAY_DESC','EBAY_CONDITION'];
+  const res={};
+  ms.forEach(m=>{
+    const k=m.toLowerCase();
+    const s=text.indexOf(`===${m}===`);
+    if(s===-1){res[k]='';return;}
+    const after=text.slice(s+m.length+6);
+    const next=after.indexOf('===');
+    res[k]=(next===-1?after:after.slice(0,next)).trim();
   });
-  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API error'); }
-  const data = await res.json();
-  return data.choices[0].message.content;
+  return res;
 }
 
-async function callGroqVision(base64, prompt) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
-    body: JSON.stringify({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image_url', image_url: { url: base64 } },
-          { type: 'text', text: prompt }
-        ]
-      }],
-      max_tokens: 2000
-    })
+function calcSEO(d,kws){
+  let sc=40;
+  const all=Object.values(d).join(' ').toLowerCase();
+  if(d.amazon_title?.length>50)sc+=10;
+  if(d.amazon_bullets?.includes('•'))sc+=10;
+  if(d.amazon_desc?.length>100)sc+=10;
+  if(d.shopify_tags?.includes(','))sc+=10;
+  if(Array.isArray(kws))sc+=Math.min(20,kws.filter(k=>all.includes(k.toLowerCase())).length*2);
+  return Math.min(99,sc);
+}
+
+// ── RENDER ──
+function renderKW(kws){
+  const w=document.getElementById('kw-wrap');w.innerHTML='';
+  if(!Array.isArray(kws))return;
+  kws.forEach(k=>{
+    const sc=Math.floor(Math.random()*30+70);
+    const d=document.createElement('div');d.className='kw';
+    d.innerHTML=`${k}<span class="kw-sc">${sc}</span>`;
+    d.onclick=()=>copyText(k);w.appendChild(d);
   });
-  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API error'); }
-  const data = await res.json();
-  return data.choices[0].message.content;
+  document.getElementById('kw-panel').classList.add('show');
 }
 
-function extractAllSections(text) {
-  const markers = ['AMAZON_TITLE','AMAZON_BULLETS','AMAZON_DESC','SHOPIFY_TITLE','SHOPIFY_DESC','SHOPIFY_TAGS','EBAY_TITLE','EBAY_DESC','EBAY_CONDITION'];
-  const result = {};
-  markers.forEach(m => {
-    const key = m.toLowerCase().replace('amazon_','amazon_').replace('shopify_','shopify_').replace('ebay_','ebay_');
-    const start = text.indexOf(`===${m}===`);
-    if (start === -1) { result[key] = ''; return; }
-    const after = text.slice(start + m.length + 6);
-    const next = after.indexOf('===');
-    result[key] = (next === -1 ? after : after.slice(0, next)).trim();
+function renderPricing(p){
+  document.getElementById('price-insight').textContent=p.insight;
+  document.getElementById('price-cards').innerHTML=`
+    <div class="pc" onclick="selPC(this,'${p.budget}')"><div class="pc-lbl">Budget</div><div class="pc-val">$${p.budget}</div><div class="pc-note">More volume</div></div>
+    <div class="pc sel" onclick="selPC(this,'${p.optimal}')"><div class="pc-lbl">Optimal ★</div><div class="pc-val">$${p.optimal}</div><div class="pc-note">Best balance</div></div>
+    <div class="pc" onclick="selPC(this,'${p.premium}')"><div class="pc-lbl">Premium</div><div class="pc-val">$${p.premium}</div><div class="pc-note">Higher margin</div></div>`;
+  document.getElementById('price-panel').classList.add('show');
+}
+
+function selPC(el,val){document.querySelectorAll('.pc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');document.getElementById('product-price').value='$'+val;}
+
+function renderSEO(sc){
+  document.getElementById('seo-num').textContent=sc;
+  document.getElementById('ss').textContent=sc;
+  const col=sc>=80?'var(--a4)':sc>=60?'#f59e0b':'#ef4444';
+  document.getElementById('seo-ring').style.background=`conic-gradient(${col} ${sc*3.6}deg, var(--card2) 0deg)`;
+  const lbl=sc>=80?'Excellent':'Good';
+  document.getElementById('seo-lbl').textContent=`SEO Score — ${lbl}`;
+  document.getElementById('seo-tip').textContent=sc>=80?'Your listing is well-optimized with strong keywords.':'Add more keywords and expand descriptions for a higher score.';
+  document.getElementById('seo-panel').classList.add('show');
+}
+
+function renderListings(d,kws){
+  setText('az-t',d.amazon_title);
+  renderBullets('az-b',d.amazon_bullets);
+  setText('az-d',d.amazon_desc);
+  setText('sh-t',d.shopify_title);
+  setText('sh-d',d.shopify_desc);
+  renderTags('sh-tg',d.shopify_tags);
+  setText('eb-t',d.ebay_title);
+  setText('eb-d',d.ebay_desc);
+  setText('eb-c',d.ebay_condition);
+  document.getElementById('sw').textContent=Object.values(d).join(' ').split(/\s+/).length;
+  document.getElementById('sk').textContent=Array.isArray(kws)?kws.length:'—';
+}
+
+function setText(id,text){
+  const el=document.getElementById(id);
+  const btn=el.querySelector('.icopy');
+  el.textContent=text||'';
+  if(btn)el.appendChild(btn);
+}
+
+function renderBullets(id,text){
+  const el=document.getElementById(id);
+  const btn=el.querySelector('.icopy');
+  el.innerHTML='';
+  if(!text)return;
+  text.split('\n').filter(l=>l.trim()).forEach(line=>{
+    const c=line.replace(/^[•\-\*]\s*/,'').trim();
+    if(!c)return;
+    const d=document.createElement('div');d.className='bullet-row';
+    d.innerHTML=`<div class="bdot"></div><span>${c}</span>`;
+    el.appendChild(d);
   });
-  return result;
+  if(btn)el.appendChild(btn);
 }
 
-function calcSEO(listings, keywords) {
-  let score = 40;
-  const allText = Object.values(listings).join(' ').toLowerCase();
-  if (listings.amazon_title && listings.amazon_title.length > 50) score += 10;
-  if (listings.amazon_bullets && listings.amazon_bullets.includes('•')) score += 10;
-  if (listings.amazon_desc && listings.amazon_desc.length > 100) score += 10;
-  if (listings.shopify_tags && listings.shopify_tags.includes(',')) score += 10;
-  if (Array.isArray(keywords)) {
-    const matched = keywords.filter(k => allText.includes(k.toLowerCase())).length;
-    score += Math.min(20, matched * 2);
-  }
-  return Math.min(99, score);
-}
-
-// ── RENDER ────────────────────────────────────────────────
-function renderKeywords(keywords) {
-  const box = document.getElementById('keywords-box');
-  const grid = document.getElementById('kw-grid');
-  grid.innerHTML = '';
-  if (!Array.isArray(keywords)) return;
-  keywords.forEach((kw, i) => {
-    const score = Math.floor(Math.random() * 30 + 70);
-    const div = document.createElement('div');
-    div.className = 'kw-tag';
-    div.innerHTML = `${kw} <span class="kw-score">${score}</span>`;
-    div.onclick = () => copyText(kw);
-    grid.appendChild(div);
+function renderTags(id,text){
+  const el=document.getElementById(id);el.innerHTML='';
+  if(!text)return;
+  const w=document.createElement('div');w.className='tags-wrap';
+  text.split(',').forEach(t=>{
+    const tag=t.trim();if(!tag)return;
+    const s=document.createElement('span');s.className='stag';s.textContent=tag;
+    s.onclick=()=>copyText(tag);w.appendChild(s);
   });
-  box.classList.add('visible');
+  el.appendChild(w);
 }
 
-function renderPricing(pricing) {
-  const box = document.getElementById('price-box');
-  document.getElementById('price-insight').textContent = pricing.insight;
-  const grid = document.getElementById('price-grid');
-  grid.innerHTML = `
-    <div class="price-card" onclick="selectPrice(this, '${pricing.budget}')">
-      <div class="price-card-label">Budget</div>
-      <div class="price-card-value">$${pricing.budget}</div>
-      <div class="price-card-note">More volume</div>
-    </div>
-    <div class="price-card selected" onclick="selectPrice(this, '${pricing.optimal}')">
-      <div class="price-card-label">Optimal ★</div>
-      <div class="price-card-value">$${pricing.optimal}</div>
-      <div class="price-card-note">Best balance</div>
-    </div>
-    <div class="price-card" onclick="selectPrice(this, '${pricing.premium}')">
-      <div class="price-card-label">Premium</div>
-      <div class="price-card-value">$${pricing.premium}</div>
-      <div class="price-card-note">Higher margin</div>
-    </div>
-  `;
-  box.classList.add('visible');
-}
-
-function selectPrice(el, val) {
-  document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('product-price').value = '$' + val;
-}
-
-function renderSEO(score) {
-  const box = document.getElementById('seo-score-box');
-  document.getElementById('score-num').textContent = score;
-  document.getElementById('stat-score').textContent = score;
-
-  const pct = score / 100;
-  document.getElementById('score-circle').style.background =
-    `conic-gradient(${score >= 80 ? 'var(--success)' : score >= 60 ? 'var(--warning)' : 'var(--danger)'} ${pct*360}deg, var(--surface2) 0deg)`;
-
-  const label = score >= 80 ? '🟢 Excellent' : score >= 60 ? '🟡 Good' : '🔴 Needs Work';
-  document.getElementById('score-label').textContent = `SEO Score — ${label}`;
-  document.getElementById('score-tips').textContent = score >= 80
-    ? 'Your listing is well-optimized with strong keywords and complete content.'
-    : score >= 60
-    ? 'Good listing. Add more specific keywords and expand descriptions for a higher score.'
-    : 'Add more keywords, expand descriptions, and use all available bullet points.';
-  box.classList.add('visible');
-}
-
-function renderListings(data) {
-  setText('az-title', data.amazon_title);
-  renderBullets('az-bullets', data.amazon_bullets);
-  setText('az-desc', data.amazon_desc);
-  setText('sh-title', data.shopify_title);
-  setText('sh-desc', data.shopify_desc);
-  renderTagsEl('sh-tags', data.shopify_tags);
-  setText('eb-title', data.ebay_title);
-  setText('eb-desc', data.ebay_desc);
-  setText('eb-condition', data.ebay_condition);
-
-  const words = Object.values(data).join(' ').split(/\s+/).length;
-  const kws = document.getElementById('kw-grid').children.length;
-  document.getElementById('stat-words').textContent = words;
-  document.getElementById('stat-kw').textContent = kws;
-}
-
-function setText(id, text) {
-  const el = document.getElementById(id);
-  const btn = el.querySelector('.inline-copy');
-  el.textContent = text || '';
-  if (btn) el.appendChild(btn);
-}
-
-function renderBullets(id, text) {
-  const el = document.getElementById(id);
-  const btn = el.querySelector('.inline-copy');
-  el.innerHTML = '';
-  if (!text) return;
-  text.split('\n').filter(l => l.trim()).forEach(line => {
-    const clean = line.replace(/^[•\-\*]\s*/, '').trim();
-    if (!clean) return;
-    const div = document.createElement('div');
-    div.className = 'bullet-row';
-    div.innerHTML = `<div class="bullet-dot"></div><span>${clean}</span>`;
-    el.appendChild(div);
-  });
-  if (btn) el.appendChild(btn);
-}
-
-function renderTagsEl(id, text) {
-  const el = document.getElementById(id);
-  el.innerHTML = '';
-  if (!text) return;
-  const wrap = document.createElement('div');
-  wrap.className = 'tags-row';
-  text.split(',').forEach(t => {
-    const tag = t.trim();
-    if (!tag) return;
-    const span = document.createElement('span');
-    span.className = 'stag';
-    span.textContent = tag;
-    span.onclick = () => copyText(tag);
-    wrap.appendChild(span);
-  });
-  el.appendChild(wrap);
-}
-
-// ── PLATFORM TABS ─────────────────────────────────────────
-function switchPTab(p) {
-  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.plisting').forEach(t => t.classList.remove('active'));
+// ── TABS ──
+function switchPTab(p){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.plisting').forEach(t=>t.classList.remove('active'));
   document.querySelector(`[data-p="${p}"]`).classList.add('active');
-  document.getElementById(`pl-${p}`).classList.add('active');
+  document.getElementById('pl-'+p).classList.add('active');
 }
 
-// ── COPY ──────────────────────────────────────────────────
-function copyPlatform(p) {
-  let text = '';
-  if (p === 'amazon') text = `TITLE:\n${generatedData.amazon_title}\n\nBULLETS:\n${generatedData.amazon_bullets}\n\nDESCRIPTION:\n${generatedData.amazon_desc}`;
-  if (p === 'shopify') text = `TITLE:\n${generatedData.shopify_title}\n\nDESCRIPTION:\n${generatedData.shopify_desc}\n\nTAGS:\n${generatedData.shopify_tags}`;
-  if (p === 'ebay') text = `TITLE:\n${generatedData.ebay_title}\n\nDESCRIPTION:\n${generatedData.ebay_desc}\n\nCONDITION:\n${generatedData.ebay_condition}`;
-  copyText(text);
-  const btn = document.querySelector(`#pl-${p} .btn-copy-all`);
-  if (btn) { btn.classList.add('copied'); btn.textContent = '✓ Copied!'; setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '⧉ Copy All'; }, 2000); }
+// ── COPY ──
+function copyPlat(p){
+  let t='';
+  if(p==='amazon')t=`TITLE:\n${genData.amazon_title}\n\nBULLETS:\n${genData.amazon_bullets}\n\nDESCRIPTION:\n${genData.amazon_desc}`;
+  if(p==='shopify')t=`TITLE:\n${genData.shopify_title}\n\nDESCRIPTION:\n${genData.shopify_desc}\n\nTAGS:\n${genData.shopify_tags}`;
+  if(p==='ebay')t=`TITLE:\n${genData.ebay_title}\n\nDESCRIPTION:\n${genData.ebay_desc}\n\nCONDITION:\n${genData.ebay_condition}`;
+  copyText(t);
+  const btn=document.querySelector(`#pl-${p} .btn-copy-all`);
+  if(btn){btn.classList.add('copied');btn.textContent='✓ Copied!';setTimeout(()=>{btn.classList.remove('copied');btn.textContent='⧉ Copy All';},2000);}
 }
 
-function copyEl(id) {
-  const el = document.getElementById(id);
-  const text = el.innerText.replace('copy','').trim();
-  copyText(text);
+function copyEl(id){const el=document.getElementById(id);copyText(el.innerText.replace('copy','').trim());}
+function copyText(t){navigator.clipboard.writeText(t).then(()=>showToast('Copied!'));}
+
+// ── PDF ──
+function exportPDF(){
+  const d=genData;
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>ListAI Export</title><style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6}h1{font-size:22px;margin-bottom:4px}h2{font-size:16px;margin:20px 0 6px;color:#333;border-bottom:2px solid #eee;padding-bottom:3px}h3{font-size:13px;color:#666;margin:12px 0 3px}p{margin:0 0 8px}ul{padding-left:20px}li{margin-bottom:4px}.plat{background:#f9f9f9;border-radius:8px;padding:14px;margin-bottom:14px}</style></head><body><h1>Product Listings — ListAI</h1><p style="color:#888">${new Date().toLocaleDateString()}</p><div class="plat"><h2>Amazon</h2><h3>Title</h3><p>${d.amazon_title||''}</p><h3>Bullet Points</h3><ul>${(d.amazon_bullets||'').split('\n').filter(l=>l.trim()).map(l=>`<li>${l.replace(/^[•\-\*]\s*/,'')}</li>`).join('')}</ul><h3>Description</h3><p>${d.amazon_desc||''}</p></div><div class="plat"><h2>Shopify</h2><h3>Title</h3><p>${d.shopify_title||''}</p><h3>Description</h3><p>${d.shopify_desc||''}</p><h3>Tags</h3><p>${d.shopify_tags||''}</p></div><div class="plat"><h2>eBay</h2><h3>Title</h3><p>${d.ebay_title||''}</p><h3>Description</h3><p>${d.ebay_desc||''}</p><h3>Condition</h3><p>${d.ebay_condition||''}</p></div></body></html>`);
+  w.document.close();w.print();
 }
 
-function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => showToast('Copied!'));
+// ── UTILS ──
+function hideExtra(){
+  document.getElementById('kw-panel').classList.remove('show');
+  document.getElementById('price-panel').classList.remove('show');
+  document.getElementById('seo-panel').classList.remove('show');
+  document.getElementById('agent-panel').classList.remove('show');
 }
 
-// ── PDF EXPORT ────────────────────────────────────────────
-function exportPDF() {
-  const d = generatedData;
-  const content = `
-    <html><head><title>Listings Export</title>
-    <style>
-      body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; color: #111; }
-      h1 { font-size: 24px; margin-bottom: 8px; }
-      h2 { font-size: 18px; margin: 24px 0 8px; color: #333; border-bottom: 2px solid #eee; padding-bottom: 4px; }
-      h3 { font-size: 14px; color: #666; margin: 16px 0 4px; }
-      p { line-height: 1.6; margin: 0 0 8px; }
-      ul { padding-left: 20px; }
-      li { line-height: 1.8; }
-      .platform { background: #f9f9f9; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-    </style></head><body>
-    <h1>Product Listings — Generated by ListAI</h1>
-    <p style="color:#666">${new Date().toLocaleDateString()}</p>
-    <div class="platform">
-      <h2>🛒 Amazon Listing</h2>
-      <h3>Title</h3><p>${d.amazon_title||''}</p>
-      <h3>Bullet Points</h3><ul>${(d.amazon_bullets||'').split('\n').filter(l=>l.trim()).map(l=>`<li>${l.replace(/^[•\-\*]\s*/,'')}</li>`).join('')}</ul>
-      <h3>Description</h3><p>${d.amazon_desc||''}</p>
-    </div>
-    <div class="platform">
-      <h2>🏪 Shopify Listing</h2>
-      <h3>Title</h3><p>${d.shopify_title||''}</p>
-      <h3>Description</h3><p>${d.shopify_desc||''}</p>
-      <h3>Tags</h3><p>${d.shopify_tags||''}</p>
-    </div>
-    <div class="platform">
-      <h2>📦 eBay Listing</h2>
-      <h3>Title</h3><p>${d.ebay_title||''}</p>
-      <h3>Description</h3><p>${d.ebay_desc||''}</p>
-      <h3>Condition</h3><p>${d.ebay_condition||''}</p>
-    </div>
-    </body></html>
-  `;
-  const win = window.open('', '_blank');
-  win.document.write(content);
-  win.document.close();
-  win.print();
+function resetSingle(){
+  curFile=null;curB64=null;genData={};
+  document.getElementById('preview-wrap').classList.remove('show');
+  document.getElementById('upload-zone').style.display='';
+  fi.value='';
+  document.getElementById('results').classList.remove('show');
+  hideExtra();hideErr();
 }
 
-function exportAllPDF() {
-  showToast('Opening print dialog...');
-  setTimeout(() => window.print(), 500);
+function resetBulk(){
+  bulkFiles=[];bulkRes=[];
+  document.getElementById('bulk-grid').innerHTML='';
+  document.getElementById('bulk-gen-wrap').style.display='none';
+  document.getElementById('bulk-results').style.display='none';
+  bi.value='';
 }
 
-// ── UTILS ─────────────────────────────────────────────────
-function showResults() {
-  document.getElementById('results').style.display = 'block';
-  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-function hideResults() {
-  document.getElementById('results').style.display = 'none';
-  document.getElementById('keywords-box').classList.remove('visible');
-  document.getElementById('price-box').classList.remove('visible');
-  document.getElementById('seo-score-box').classList.remove('visible');
-  document.getElementById('agent-steps').classList.remove('visible');
-}
-
-function resetSingle() {
-  currentFile = null; currentBase64 = null; generatedData = {};
-  document.getElementById('preview-container').classList.remove('visible');
-  document.getElementById('upload-zone').style.display = '';
-  fileInput.value = '';
-  hideResults();
-  hideError();
-}
-
-function resetBulk() {
-  bulkFiles = []; bulkResults = [];
-  document.getElementById('bulk-grid').innerHTML = '';
-  document.getElementById('bulk-generate-wrap').style.display = 'none';
-  document.getElementById('bulk-results').style.display = 'none';
-  bulkInput.value = '';
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-function showError(msg) {
-  const el = document.getElementById('error-box');
-  el.textContent = '⚠ ' + msg;
-  el.classList.add('visible');
-}
-
-function hideError() {
-  document.getElementById('error-box').classList.remove('visible');
-}
-
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function showErr(msg){const e=document.getElementById('err-box');e.textContent='⚠ '+msg;e.classList.add('show');}
+function hideErr(){document.getElementById('err-box').classList.remove('show');}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
 </script>
 </body>
 </html>
